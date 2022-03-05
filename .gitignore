@@ -1,0 +1,5 @@
+#   CLIENT
+client/node_modules
+
+#   API
+restapi/venv
