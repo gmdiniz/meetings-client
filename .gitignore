@@ -5,3 +5,4 @@ client/node_modules
 restapi/venv
 restapi/app/__pycache__
 restapi/videoconf/__pycache__
+.vscode/launch.json
