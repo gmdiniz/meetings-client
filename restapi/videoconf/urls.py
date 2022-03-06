@@ -10,7 +10,7 @@ urlpatterns = [
         restapi.ListAllMeetings, 
         name="list_meetings"),
 
-    path('<int:meeting_id>/', 
+    path('<uuid:meeting_id>/', 
         restapi.DetailedMeeting, 
         name='detailed_list'),
 ]
