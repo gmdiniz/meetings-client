@@ -12,6 +12,13 @@ class Meeting(models.Model):
     end_date = models.DateField(null=True, blank=True)
     creation = models.DateField(auto_now_add=True)
     active = models.BooleanField(null=False, default=True)
+    participants = models.JSONField(default=list, decoder=None, blank=True)
     moderators = models.JSONField(default=list, decoder=None, blank=True)
     metadata = models.JSONField(default=list, decoder=None, blank=True)
     permissions = models.JSONField(default=list, decoder=None, blank=True)
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    metadata = models.JSONField(default=list, decoder=None, blank=True)
+    phone_number = models.CharField(max_length=256, null=False)
