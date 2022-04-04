@@ -1,36 +1,41 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+import Meetings from "../views/Meetings.vue";
+import Login from "../views/Login.vue";
+import Register from "../views/Register.vue";
+import Logout from "../views/Logout.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: Home
+    name: "meetings",
+    component: Meetings,
+    meta: {
+      requiresLogin: true
+    }
   },
   {
     path: "/login",
-    name: "LoginForm",
-    component: () =>
-      import("../views/Login.vue")
+    name: "login",
+    component: Login
   },
   {
-    path: "/meetings",
-    name: "MeetingsList",
-    component: () =>
-      import("../views/Meetings.vue")
+    path: "/register",
+    name: "register",
+    component: Register
   },
   {
-    path: "/about",
-    name: "About",
-    component: () =>
-      import("../views/About.vue")
+    path: "/logout",
+    name: "logout",
+    component: Logout 
   }
 ];
 
 const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
   routes
 });
 

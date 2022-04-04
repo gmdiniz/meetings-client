@@ -9,17 +9,26 @@
 
 <script>
     import { getAPI } from '../axios-api'
+    import { mapState } from 'vuex'
+
     export default {
-        name: "Meeting",
+        name: "Meetings",
+        onIdle () {
+            this.$store.dispatch('userLogout')
+            .then(() => {
+                this.$router.push({ name: 'login' })
+            })
+        },
         data: function () {
             return {
                 meetingsList: []
             };
         },
+        computed: mapState(['APIData']), 
         created: function () {
-            getAPI.get('/videoconf/list_meetings',)
+            getAPI.get('/videoconf/list_meetings', { headers: { Authorization: `Bearer ${this.$store.state.accessToken}` } })
             .then( response => {
-                console.log(response.data)
+                this.$store.state.APIData = response.data
                 this.meetingsList = response.data
             })
             .catch( error => {
