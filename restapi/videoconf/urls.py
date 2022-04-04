@@ -1,6 +1,4 @@
-from unicodedata import name
 from django.urls import path
-
 from .views import restapi
 
 app_name = 'videoconference'
