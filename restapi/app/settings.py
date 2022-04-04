@@ -1,4 +1,5 @@
 from pathlib import Path
+import os, django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,8 +14,7 @@ SECRET_KEY = 'django-insecure-v^&b4h9%f%hj@npu1tlfhk!_1+#@unm3n31fpx8=d6dyvxx6&i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['meetings-restapi.herokuapp.com']
 
 # Application definition
 
@@ -74,13 +74,25 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'videoconference',
-        'USER': 'postgres',
-        'PASSWORD': '91739173',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'dcd6fopt4r95qd',
+        'USER': 'soksgujmftgqxu',
+        'PASSWORD': '27080cf2dbb3fb399d61ce11d792ed21cd3201a258fbe1f49ff4509664a3af63',
+        'HOST': 'ec2-54-157-79-121.compute-1.amazonaws.com',
+        'PORT': '5432',
     }
 }
+
+# Test DB
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'videoconference',
+#         'USER': 'postgres',
+#         'PASSWORD': '91739173',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
 
 
 # Password validation
@@ -113,7 +125,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+django_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
