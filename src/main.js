@@ -2,16 +2,8 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import IdleVue from 'idle-vue'
-
-const eventsHub = new Vue()
 
 Vue.config.productionTip = false;
-
-Vue.use(IdleVue, {
-  eventEmitter: eventsHub,
-  idleTime: 10000
-})
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresLogin)) {
@@ -26,7 +18,7 @@ router.beforeEach((to, from, next) => {
 })
 
 new Vue({
-  router,
-  store,
+  router: router,
+  store: store,
   render: h => h(App)
 }).$mount("#app");

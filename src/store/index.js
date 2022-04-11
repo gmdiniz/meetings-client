@@ -6,8 +6,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    accessToken: null,
-    refreshToken: null, 
+    accessToken: localStorage.getItem('accessToken') || null,
+    refreshToken: localStorage.getItem('refreshToken') || null, 
     APIData: ''
   },
   mutations: {
@@ -18,11 +18,13 @@ export default new Vuex.Store({
     destroyToken (state) {
       state.accessToken = null
       state.refreshToken = null
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     }
   },
   getters: {
     loggedIn (state) {
-      return state.accessToken != null
+      return !!state.accessToken
     }
   },
   actions: {
@@ -38,6 +40,8 @@ export default new Vuex.Store({
           password: userCredentials.password
         }) 
         .then( response => {
+          localStorage.setItem('accessToken', response.data.access);
+          localStorage.setItem('refreshToken', response.data.refresh);
           context.commit('updateStorage', { 
                           access: response.data.access, 
                           refresh: response.data.refresh})
@@ -48,6 +52,10 @@ export default new Vuex.Store({
           reject()
         })
       })
+    },
+    fetchAccessToken(context) {
+      context.commit('updateStorage', { access: localStorage.getItem('accessToken'),
+                                        refresh: localStorage.getItem('refreshToken')});
     }
   },
   modules: {
