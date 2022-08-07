@@ -8,10 +8,10 @@
                     <div class="incoming-messages">
                         <div class="incoming-message" v-for="(message, index) in messages" :key="index">
                             <div class="user-name">
-                                • {{ loggedUser }}
+                                • {{ message.user }} • {{ message.event_time }} •
                             </div>
                             <div class="user-message">
-                                {{ message }}
+                                {{ message.message }}
                             </div>
                             <hr class="solid">
                         </div>
@@ -140,7 +140,8 @@
                 sendMessage() {
                     this.chatSocket.send(
                         JSON.stringify({
-                            message: this.message
+                            message: this.message,
+                            userLogin: this.loggedUser
                         })
                     );
 
@@ -155,12 +156,12 @@
         mounted() {
             this.chatSocket.onmessage = e => {
                 const data = JSON.parse(e.data);
-                const message = data.message;
+                const message = data;
                 this.messages.push(message);
             };
 
             this.chatSocket.onclose = e => {
-                console.error("chat socket closed unexpectedly!");
+                console.error("erro no socket!");
                 console.error(e);
             };
         }
