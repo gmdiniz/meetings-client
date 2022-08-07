@@ -1,22 +1,24 @@
 <template>
     <div>
         <main class="box">
-            <h2>Login</h2>
+            <h2>LOGIN</h2>
             <form v-on:submit.prevent="login">
-                <div class="inputBox">
-                    <label for="userName">Login</label>
+                <div class="input-box">
+                    <label for="userName">USERNAME</label>
                     <input type="text" 
                            name="userName" 
+                           autocomplete="off"   
                            id="userName" 
                            v-model="username" 
                            placeholder="insira seu username" 
                            required/>
                 </div>
                 
-                <div class="inputBox">
-                    <label for="userPassword">Senha</label>
+                <div class="input-box">
+                    <label for="userPassword">SENHA</label>
                     <input type="password" 
                            name="userPassword" 
+                           autocomplete="off"
                            id="userPassword" 
                            v-model="password" 
                            placeholder="insira sua senha"
@@ -25,9 +27,9 @@
 
                 <p v-if="incorrectAuth" class="incorrenct-creds">Nome de login ou senha incorretos, por favor tente novamente</p>
 
-                <div>
-                    <button type="submit" name="" style="float: left">Enviar</button>
-                    <router-link class="button" style="float: left;" to="/register">Cadastrar</router-link>
+                <div class="buttons-wrapper">
+                    <button class="action-button" type="submit" style="float: left">Enviar</button>
+                    <button class="action-button" style="float: left;" v-on:click="registerRoute()">Cadastrar</button>
                 </div>
 
             </form>
@@ -45,6 +47,9 @@
                 username: '',
                 password: '',
                 incorrectAuth: false,
+                registerRoute() {
+                    this.$router.push({ name: 'register' });
+                } 
             };
         },
         methods: {
@@ -87,9 +92,9 @@
     }
 
     .box {
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: #0f0e17;
         border-radius: 10px;
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 15px 25px rgb(0 0 0 / 80%);
         margin: auto auto;
         padding: 40px;
         position: absolute;
@@ -97,51 +102,32 @@
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: left;
+        width: 25%;
+        height: 40%;
+    }
+
+    input {
+        width: 100%;
     }
 
     .box h2 {
-        margin: 0 0 30px 0;
+        margin: 0 0 42px 0;
         padding: 0;
         color: #fff;
         text-align: center;
     }
 
-    .box .inputBox label {
-        color: #fff;
+    .buttons-wrapper {
+        margin: 42px 0;
     }
 
-    .box .inputBox input {
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid #fff;
+    .input-box label {
         color: #fff;
         font-size: 18px;
-        letter-spacing: 2px;
-        margin-bottom: 30px;
-        outline: none;
-        padding: 10px 0;
-        width: 100%;
-    }
-
-    .box input[type="submit"], .box button[type="submit"], a.button {
-        font-family: sans-serif;
-        background: #03a9f4;
-        font-size: 11px;
-        border: none;
-        border-radius: 5px;
-        color: #fff;
-        cursor: pointer;
         font-weight: 600;
-        padding: 10px 20px;
-        letter-spacing: 2px;
-        outline: none;
-        text-transform: uppercase;
-        text-decoration: none;
-        margin: 2px 10px 2px 0;
-        display: inline-block;
     }
 
-    .box input[type="submit"]:hover, .box button[type="submit"]:hover, a.button:hover {
+    .action-button:hover {
         opacity: 0.8;
     }
 </style>

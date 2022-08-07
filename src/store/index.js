@@ -8,18 +8,22 @@ export default new Vuex.Store({
   state: {
     accessToken: localStorage.getItem('accessToken') || null,
     refreshToken: localStorage.getItem('refreshToken') || null, 
+    userLogin: localStorage.getItem('userLogin') || null, 
     APIData: ''
   },
   mutations: {
-    updateStorage (state, { access, refresh }) {
+    updateStorage (state, { access, refresh, userLogin }) {
       state.accessToken = access,
       state.refreshToken = refresh
+      state.userLogin = userLogin
     },
     destroyToken (state) {
       state.accessToken = null
       state.refreshToken = null
+      state.userLogin = null
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userLogin');
     }
   },
   getters: {
@@ -42,9 +46,12 @@ export default new Vuex.Store({
         .then( response => {
           localStorage.setItem('accessToken', response.data.access);
           localStorage.setItem('refreshToken', response.data.refresh);
+          localStorage.setItem('userLogin', userCredentials.username);
           context.commit('updateStorage', { 
                           access: response.data.access, 
-                          refresh: response.data.refresh})
+                          refresh: response.data.refresh,
+                          userLogin: userCredentials.username
+                        })
           resolve()
         })
         .catch( err => {
@@ -55,7 +62,9 @@ export default new Vuex.Store({
     },
     fetchAccessToken(context) {
       context.commit('updateStorage', { access: localStorage.getItem('accessToken'),
-                                        refresh: localStorage.getItem('refreshToken')});
+                                        refresh: localStorage.getItem('refreshToken'),
+                                        userLogin: localStorage.getItem('userLogin')
+                                      });
     }
   },
   modules: {

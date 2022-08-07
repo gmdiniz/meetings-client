@@ -16,5 +16,9 @@
 </script>
 
 <style scoped>
-
+  html {
+      width: 100vw;
+      height: 100vh;
+      background: #a7a9be;
+  }
 </style>

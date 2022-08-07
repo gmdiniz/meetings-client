@@ -1,28 +1,31 @@
 <template>
     <div>
         <main class="box">
-            <h2>Cadastro</h2>
+            <h2>CADASTRO</h2>
             <form>
-                <div class="inputBox">
-                    <label for="userName">Username</label>
+                <div class="input-box">
+                    <label for="userName">USERNAME</label>
                     <input type="text" name="userName" id="userName" placeholder="insira seu username" required/>
                 </div>
 
-                <div class="inputBox">
-                    <label for="userPassword">Senha</label>
+                <div class="input-box">
+                    <label for="userPassword">SENHA</label>
                     <input type="password" name="userPassword" id="userPassword" placeholder="insira sua senha"
                     required/>
                 </div>
 
-                <div class="inputBox">
-                    <label for="userConfirmPassword">Confirme sua senha</label>
+                <div class="input-box">
+                    <label for="userConfirmPassword">CONFIRME SUA SENHA</label>
                     <input type="password" name="userPassword" id="userConfirmPassword"
                     placeholder="insira sua senha novamente"
                     required/>
                 </div>
 
-                <button type="submit" name="" style="float: left">Cadastrar</button>
-                <router-link class="button" style="float: left;" to="/login">Login</router-link>
+                <div class="buttons-wrapper">
+                    <button class="action-button" type="submit" style="float: left">CADASTRAR</button>
+                    <button class="action-button" style="float: left;" v-on:click="loginRout()">LOGIN</button>
+                </div>
+                    
             </form>
         </main>
         <footer>
@@ -35,7 +38,9 @@ export default {
     name: "RegisterForm",
     data: function () {
         return {
-            
+            loginRout() {
+                this.$router.push({ name: 'login' });
+            }
         };
     }
 }
@@ -58,9 +63,9 @@ export default {
     }
 
     .box {
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: #0f0e17;
         border-radius: 10px;
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 15px 25px rgb(0 0 0 / 80%);
         margin: auto auto;
         padding: 40px;
         position: absolute;
@@ -68,6 +73,12 @@ export default {
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: left;
+        width: 25%;
+        height: 50%;
+    }
+
+    input {
+        width: 100%;
     }
 
     .box h2 {
@@ -77,42 +88,15 @@ export default {
         text-align: center;
     }
 
-    .box .inputBox label {
+    .input-box label {
         color: #fff;
     }
 
-    .box .inputBox input {
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid #fff;
-        color: #fff;
-        font-size: 18px;
-        letter-spacing: 2px;
-        margin-bottom: 30px;
-        outline: none;
-        padding: 10px 0;
-        width: 100%;
+    .buttons-wrapper {
+        margin: 30px 0;
     }
 
-    .box input[type="submit"], .box button[type="submit"], a.button {
-        font-family: sans-serif;
-        background: #03a9f4;
-        font-size: 11px;
-        border: none;
-        border-radius: 5px;
-        color: #fff;
-        cursor: pointer;
-        font-weight: 600;
-        padding: 10px 20px;
-        letter-spacing: 2px;
-        outline: none;
-        text-transform: uppercase;
-        text-decoration: none;
-        margin: 2px 10px 2px 0;
-        display: inline-block;
-    }
-
-    .box input[type="submit"]:hover, .box button[type="submit"]:hover, a.button:hover {
+    .action-button:hover {
         opacity: 0.8;
     }
 </style>
