@@ -1,0 +1,9 @@
+var constraints = {
+    video: {
+        mandatory: {
+            chromeMediaSource: 'screen'
+        }
+    }
+};
+
+navigator.webkitGetUserMedia(constraints, gotStream);

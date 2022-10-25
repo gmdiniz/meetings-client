@@ -55,8 +55,13 @@
 
     let localStream
     let peerConn
+    let peer_media_elements = []
+    let peers = {}
     let isAudio = true;
     let isVideo = true;
+    let ICE_SERVERS = [
+        {urls:"stun:stun.l.google.com:19302"}
+    ];
 
     export default {
         name: "MeetingRoom",
@@ -64,25 +69,21 @@
             return {
                 messages: [],
                 message: "",
+                channelId: "",
                 loggedUser: this.$store.state.userLogin,
-                chatSocket: new WebSocket(
+                socketServer: new WebSocket(
                     `ws://127.0.0.1:8000/ws/chat/${this.$route.params.roomId.replaceAll('-', '')}/`
                 ),
                 meetingsList: [],
                 roomId: this.$route.params.roomId,
                 startCall() {
                     navigator.getUserMedia({
-                        video: {
-                            frameRate: 24,
-                            width: {
-                                min: 480, ideal: 720, max: 1280
-                            },
-                            aspectRatio: 1.33333
-                        },
+                        video: true,
                         audio: true
                     }, (stream) => {
                         localStream = stream
                         document.getElementById("local-video").srcObject = localStream
+                        // document.getElementById("remote-video").srcObject = localStream
 
                         let configuration = {
                             iceServers: [
@@ -95,23 +96,8 @@
                         }
 
                         peerConn = new RTCPeerConnection(configuration)
-                        peerConn.addStream(localStream)
+                        console.table(peerConn)
 
-                        peerConn.onaddstream = (e) => {
-                            document.getElementById("main-content")
-                            .srcObject = e.stream
-                        }
-
-                        peerConn.onicecandidate = ((e) => {
-                            if (e.candidate == null)
-                                return
-                            // sendData({
-                            //     type: "store_candidate",
-                            //     candidate: e.candidate
-                            // })
-                        })
-
-                        // this.createAndSendOffer()
                     }, (error) => {
                         console.log(error)
                     })
@@ -138,10 +124,11 @@
 
                 },
                 sendMessage() {
-                    this.chatSocket.send(
+                    this.socketServer.send(
                         JSON.stringify({
                             message: this.message,
-                            userLogin: this.loggedUser
+                            userLogin: this.loggedUser,
+                            type: 'live_chat'
                         })
                     );
 
@@ -150,18 +137,149 @@
             };
         },
         computed: mapState(['APIData']), 
-        created: function () {
-            this.startCall();
-        },
         mounted() {
-            this.chatSocket.onmessage = e => {
+            this.startCall();
+
+            // this.socketServer.onopen = e => {
+            //     console.log("open");
+            //     console.log(e);
+            // };
+
+            this.socketServer.onmessage = e => {
                 const data = JSON.parse(e.data);
-                const message = data;
-                this.messages.push(message);
+                this.channelId = data.self_id
+
+                if(data.event_type == 'live_chat') {
+                    const message = data;
+                    this.messages.push(message);
+                } else if (data.event_type == 'add_peer'){
+                    console.log('Signaling server said to add peer:', data.channel_to_pair);
+                    var peer_id = data.channel_to_pair;
+                    
+                    var peer_connection = new RTCPeerConnection(
+                        {"iceServers": ICE_SERVERS},
+                        {"optional": [{"DtlsSrtpKeyAgreement": true}]} 
+                    );
+                    peers[peer_id] = peer_connection;
+
+                    peer_connection.onicecandidate = function(event) {
+                        if (event.candidate) {
+                            this.socketServer.send(
+                                JSON.stringify({
+                                    type: 'relayICECandidate',
+                                    peer_id: peer_id,
+                                    'ice_candidate': {
+                                        'sdpMLineIndex': event.candidate.sdpMLineIndex,
+                                        'candidate': event.candidate.candidate
+                                    }
+                                })
+                            );
+                        }
+                    }
+
+                    peer_connection.ontrack = function(event) {
+                        document.getElementById("remote-video").srcObject = event.streams[0]
+                        peer_media_elements[peer_id] = document.getElementById("remote-video").srcObject;
+                    }
+
+                    peer_connection.addStream(localStream);
+
+                    if (data.create_offer) {
+                        console.log("Creating RTC offer to ", peer_id);
+                        peer_connection.createOffer(
+                            function (local_description) { 
+                                console.log("Local offer description is: ", local_description);
+                                peer_connection.setLocalDescription(
+                                    local_description,
+                                    sendSocketEventForRelaySessionDescription(peer_id, local_description),
+                                    function() { 
+                                        alert("Offer setLocalDescription failed!"); 
+                                    }
+                                );
+                            },
+                            function (error) {
+                                console.log("Error sending offer: ", error);
+                            }
+                        );
+                    }
+                } else if (data.event_type == 'relaySessionDescription') {
+                    onSessionDescription(data)
+                } else if (data.event_type == 'relayICECandidate') {
+                    onIceCandidate(data)
+                }
             };
 
-            this.chatSocket.onclose = e => {
-                console.error("erro no socket!");
+            function onIceCandidate(config) {
+                var peer = peers[config.peer_id];
+                var ice_candidate = config.ice_candidate;
+                peer.addIceCandidate(new RTCIceCandidate(ice_candidate));
+            }
+
+            function sendSocketEventForRelaySessionDescription(peer_id, local_description) {
+                this.socketServer.send(
+                    JSON.stringify({
+                        type: 'relaySessionDescription',
+                        peer_id: peer_id,
+                        session_description: local_description
+                    })
+                );
+                alert("Offer setLocalDescription succeed!")
+            }
+
+            function onSessionDescription(config) {
+                console.log('Remote description received: ', config);
+                var peer_id = config.peer_id;
+                var peer = peers[peer_id];
+                var remote_description = config.session_description;
+                console.log(config.session_description);
+
+                var desc = new RTCSessionDescription(remote_description);
+                var stuff = peer.setRemoteDescription(desc, 
+                    function() {
+                        console.log("setRemoteDescription succeeded");
+                        if (remote_description.type == "offer") {
+                            console.log("Creating answer");
+                            peer.createAnswer(
+                                function(local_description) {
+                                    console.log("Answer description is: ", local_description);
+                                    peer.setLocalDescription(local_description,
+                                        function() { 
+
+                                            this.socketServer.send(
+                                                JSON.stringify({
+                                                    type: 'relaySessionDescription',
+                                                    peer_id: peer_id,
+                                                    session_description: local_description
+                                                })
+                                            );
+                                            console.log("Answer setLocalDescription succeeded");
+                                        },
+                                        function() { 
+                                            alert("Answer setLocalDescription failed!"); 
+                                        }
+                                    );
+                                },
+                                function(error) {
+                                    console.log("Error creating answer: ", error);
+                                    console.log(peer);
+                                });
+                        }
+                    },
+                    function(error) {
+                        console.log("setRemoteDescription error: ", error);
+                    }
+                );
+                console.log("Session description: ", desc);
+                console.log("Stuff Object: ", stuff);
+            }
+
+            this.socketServer.onclose = e => {
+                console.error("Erro no socket!");
+                console.error(e);
+            };
+            
+            this.socketServer.onerror = e => {
+                console.error("Erro no socket!");
                 console.error(e);
             };
         }
@@ -184,7 +302,6 @@
         top: 0;
         left: 0;
         margin: 20px;
-        border-radius: 12px;
         max-width: 20%;
         max-height: 20%;
         background: #ffffff;
@@ -198,10 +315,10 @@
     }
 
     .remote-video {
-        border-radius: 12px;
         height: 80vh;
+        align-self: center;
         width: 70vw;
-        background: #a7a9be;
+        background: rgb(255, 255, 255, 0.3);
         margin: 32px 0 32px 32px;
         transition: all 0.3s;
     }
