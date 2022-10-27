@@ -29,6 +29,9 @@ export default new Vuex.Store({
   getters: {
     loggedIn (state) {
       return !!state.accessToken
+    },
+    userLogin ({userLogin}) {
+      return userLogin
     }
   },
   actions: {
